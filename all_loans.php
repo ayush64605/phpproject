@@ -1,17 +1,16 @@
 <?php
-require_once 'backend/loan.php';
-$conn = Database::connect();
-
-$userId = $_SESSION['user']['id'] ?? null;
-if (!$userId) {
+include_once 'backend/loan.php';
+$user = $_SESSION['user']['id'];
+if (!$user) {
     header('location:index.php');
-    exit;
 }
 
 $account = new Loan($conn);
-$accNo = $account->getAccountNumber($userId);
-$loans = $account->getLoans($accNo);
 
+$user = $_SESSION['user']['id'];
+$acc_no = $account->getAccno($user);
+
+$loans = $account->getLoans($acc_no['acc_number']);
 ?>
 <!DOCTYPE html>
 <html lang="en">

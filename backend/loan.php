@@ -1,50 +1,53 @@
 <?php
-require_once 'account.php';
-require_once 'transaction_traits.php';
+include_once('dbConnect.php');
+include_once('account.php');
+include_once('transaction_traits.php');
 
-class Loan extends Account implements TransactionInterface
+class Loan extends Account
 {
     use TransactionTrait;
 
-    public function addLoan(int $accNo, float $amount): bool
+    protected $conn;
+
+    public function __construct($conn)
     {
-        if ($amount <= 0) {
-            throw new Exception("Invalid loan amount");
-        }
-
-        $loanNo = mt_rand(10000, 99999);
-
-        $stmt = $this->getConnection()->prepare(
-            "INSERT INTO loans (loan_no, acc_no, amount, restamount)
-             VALUES (?, ?, ?, ?)"
-        );
-
-        return $stmt->execute([$loanNo, $accNo, $amount, $amount]);
+        $this->conn = $conn;
     }
 
-    public function getLoans(int $accNo): array
+    public function addLoan($acc_no, $amount)
     {
-        $stmt = $this->getConnection()->prepare(
-            "SELECT * FROM loans WHERE acc_no = ?"
-        );
-        $stmt->execute([$accNo]);
-        return $stmt->fetchAll();
+        $this->amount = $amount;
+        $this->acc_no = $acc_no;
+
+        $loan_number = mt_rand(10000, 99999);
+
+
+        $stmt = $this->conn->prepare("INSERT INTO loans (loan_no, acc_no, amount, restamount) VALUES (?, ?, ?, ?)");
+        return $stmt->execute([$loan_number, $acc_no, $amount, $amount]);
     }
 
-    public function updateLoanBalance(int $loanNo, float $amount): bool
+    public function getLoans($acc_no)
     {
-        $stmt = $this->getConnection()->prepare(
-            "UPDATE loans SET restamount = ? WHERE loan_no = ?"
-        );
-        return $stmt->execute([$amount, $loanNo]);
+        $res = $this->conn->prepare("SELECT * FROM loans WHERE acc_no = ?");
+        $res->execute([$acc_no]);
+        return $res->fetchAll();
     }
 
-    public function getLoanAmount(int $loanNo): float
+    public function updateLoanBalance($loan_no, $value)
     {
-        $stmt = $this->getConnection()->prepare(
-            "SELECT restamount FROM loans WHERE loan_no = ?"
-        );
-        $stmt->execute([$loanNo]);
-        return (float) $stmt->fetchColumn();
+        $this->loan_no = $loan_no;
+        $this->balance = $value;
+
+        $res = $this->conn->prepare("UPDATE loans SET restamount='$this->balance' WHERE loan_no=?");
+        return $res->execute([$loan_no]);
     }
+
+    public function getLoanAmount($loan_no)
+    {
+        $res = $this->conn->prepare("SELECT restamount FROM loans WHERE loan_no = ?");
+        $res->execute([$loan_no]);
+        return $res->fetch();
+    }
+
 }
+?>

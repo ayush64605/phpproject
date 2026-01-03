@@ -1,45 +1,57 @@
 <?php
-require_once 'backend/transaction.php';
-$conn = Database::connect();
-
-$userId = $_SESSION['user']['id'] ?? null;
-if (!$userId) {
+include_once 'backend/transaction.php';
+$user = $_SESSION['user']['id'];
+if (!$user) {
     header('location:index.php');
-    exit;
 }
-
 if (isset($_POST['transaction'])) {
     $account = new Transaction($conn);
 
-    $senderBalance = $account->showBalance($userId);
-    $senderAccNo   = $account->getAccountNumber($userId);
+    $userId = $_SESSION['user']['id'];
+    $rs = $account->showBalance($userId);
+    $acc_no_row = $account->getAccno($userId);
+    $acc_no = $acc_no_row['acc_number'] ?? null;
 
-    $receiverUserId = $account->getUserByAccount($_POST['acc_no']);
-    if (!$receiverUserId) {
-        $_SESSION['msg'] = "Invalid Account Number.";
+    $recipientData = $account->getUser($_POST['acc_no']);
+
+    if (!$recipientData) {
+        $_SESSION['msg'] = "Enter Valid Account No.";
         $_SESSION['msg_class'] = "#dc3545";
         header("location:dashboard.php");
-        exit;
+        exit();
     }
 
-    $receiverBalance = $account->showBalance($receiverUserId);
+    $rs2 = $account->showBalance($recipientData['user']);
 
-    if ($senderBalance < $_POST['amount']) {
+    $amount = $rs['balance'];
+    $transferAmount = $_POST['amount'];
+
+    if ($amount < $transferAmount) {
         $_SESSION['msg'] = "Insufficient Balance.";
         $_SESSION['msg_class'] = "#dc3545";
         header("location:dashboard.php");
-        exit;
+        exit();
     }
 
-    $account->updateBalance($userId, $senderBalance - $_POST['amount']);
-    $account->updateBalance($receiverUserId, $receiverBalance + $_POST['amount']);
-    $account->addTransaction($senderAccNo, $_POST['acc_no'], $_POST['amount']);
+    $value = $amount - $transferAmount;
+    $value2 = $rs2['balance'] + $transferAmount;
 
-    $_SESSION['msg'] = "Transfer successful.";
-    $_SESSION['msg_class'] = "#28a745";
-    header("location:dashboard.php");
+    $res = $account->updateBalance($userId, $value);
+    $res2 = $account->updateBalance($recipientData['user'], $value2);
+    $res3 = $account->addTransaction($acc_no, $_POST['acc_no'], $transferAmount);
+
+    if ($res && $res2 && $res3) {
+        $_SESSION['msg'] = "Transfer successful.";
+        $_SESSION['msg_class'] = "#28a745";
+        header("location:dashboard.php");
+        exit();
+    } else {
+        $_SESSION['msg'] = "Transaction failed.";
+        $_SESSION['msg_class'] = "#dc3545";
+        header("location:dashboard.php");
+        exit();
+    }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">

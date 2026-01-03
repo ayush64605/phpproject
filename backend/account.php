@@ -1,56 +1,49 @@
 <?php
-require_once 'dbConnect.php';
+include_once('dbConnect.php');
 
-abstract class Account
+class Account
 {
-    private PDO $conn;
-
-    public function __construct(PDO $conn)
+    protected $conn;
+    protected $accNumber;
+    protected $balance;
+    public function __construct($conn)
     {
         $this->conn = $conn;
     }
 
-    protected function getConnection(): PDO
+    public function showBalance($user)
     {
-        return $this->conn;
+        $res = $this->conn->prepare("SELECT balance FROM accounts WHERE user = ?");
+        $res->execute([$user]);
+        return $res->fetch();
     }
 
-    public function showBalance(int $userId): float
+    public function getAccno($user)
     {
-        $stmt = $this->conn->prepare(
-            "SELECT balance FROM accounts WHERE user = ?"
-        );
-        $stmt->execute([$userId]);
-        return (float) $stmt->fetchColumn();
+        $res = $this->conn->prepare("SELECT acc_number FROM accounts WHERE user = ?");
+        $res->execute([$user]);
+        return $res->fetch();
     }
 
-    public function getAccountNumber(int $userId): int
+    public function getUser($acc_no)
     {
-        $stmt = $this->conn->prepare(
-            "SELECT acc_number FROM accounts WHERE user = ?"
-        );
-        $stmt->execute([$userId]);
-        return (int) $stmt->fetchColumn();
+        $res = $this->conn->prepare("SELECT user FROM accounts WHERE acc_number = ?");
+        $res->execute([$acc_no]);
+        return $res->fetch();
     }
 
-    public function getUserByAccount(int $accNo): int
+    public function updateBalance($user, $value)
     {
-        $stmt = $this->conn->prepare(
-            "SELECT user FROM accounts WHERE acc_number = ?"
-        );
-        $stmt->execute([$accNo]);
-        return (int) $stmt->fetchColumn();
-    }
+        $this->user = $user;
+        $this->balance = $value;
 
-    public function updateBalance(int $userId, float $amount): bool
-    {
-        if ($amount < 0) {
-            throw new Exception("Balance cannot be negative");
-        }
-
-        $stmt = $this->conn->prepare(
-            "UPDATE accounts SET balance = ? WHERE user = ?"
-        );
-        return $stmt->execute([$amount, $userId]);
+        $res = $this->conn->prepare("UPDATE accounts SET balance='$this->balance' WHERE user=?");
+        return $res->execute([$user]);
     }
 }
+// $userid = $_SESSION['user']['id'];
+// $acc_user = $conn->prepare("SELECT * FROM accounts WHERE user = ?");
+// $acc_user->execute([$userid]);
+// $acc_found = $acc_user->fetch();
+// echo $acc_found['balance']
+?>

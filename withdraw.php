@@ -1,30 +1,40 @@
 <?php
-require_once 'backend/transaction.php';
-$conn = Database::connect();
-
-$userId = $_SESSION['user']['id'] ?? null;
-if (!$userId) {
+include_once 'backend/account.php';
+$user = $_SESSION['user']['id'];
+if (!$user) {
     header('location:index.php');
-    exit;
 }
-
 if (isset($_POST['Withdraw'])) {
-    $account = new Transaction($conn);
+    $account = new Account($conn);
 
-    $balance = $account->showBalance($userId);
+    $user = $_SESSION['user']['id'];
+    $rs = $account->showBalance($user);
 
-    if ($balance < $_POST['amount']) {
-        $_SESSION['msg'] = "Enter Valid Amount.";
+    $amount = $rs['balance'];
+
+    $value = $amount - $_POST['amount'];
+
+    if ($amount < $_POST['amount']) {
+        $_SESSION['msg'] = "Enter Vaild Amount.";
         $_SESSION['msg_class'] = "#dc3545";
+        header("location:dashboard.php");
     } else {
-        $account->updateBalance($userId, $balance - $_POST['amount']);
-        $_SESSION['msg'] = "Withdrawal successfully.";
-        $_SESSION['msg_class'] = "#28a745";
+        $res2 = $account->updateBalance($_SESSION['user']['id'], $value);
+
+        if ($res2) {
+            $_SESSION['msg'] = "Withdrawal successfully.";
+            $_SESSION['msg_class'] = "#28a745";
+            header("location:dashboard.php");
+
+        } else {
+            $_SESSION['msg'] = "Withdrawal failed.";
+            $_SESSION['msg_class'] = "#dc3545";
+            header("location:dashboard.php");
+        }
     }
 
-    header("location:dashboard.php");
-}
 
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

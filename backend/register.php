@@ -1,34 +1,39 @@
 <?php
-require_once 'dbConnect.php';
-
-$conn = Database::connect();
+include_once('dbConnect.php');
 
 $name = $_POST['name'];
 $email = $_POST['email'];
 $password = $_POST['password'];
 
-$check = $conn->prepare("SELECT id FROM users WHERE email = ?");
-$check->execute([$email]);
+$existing = $conn->prepare("SELECT * FROM users WHERE email = ?");
+$existing->execute([$email]);
+$user_found = $existing->fetch();
 
-if ($check->fetch()) {
-    $_SESSION['msg'] = "User Already Registered";
+if ($user_found) {
+    $_SESSION['msg'] = "User Already Registered.";
     $_SESSION['msg_class'] = "#dc3545";
-    header("Location: ../register.php");
-    exit;
+    header("location: ../register.php");
+    exit();
+} else {
+    $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+
+    if ($stmt->execute([$name, $email, $password])) {
+        $new_user_id = $conn->lastInsertId();
+        $acc_number = mt_rand(10000, 99999);
+
+        $stmt2 = $conn->prepare("INSERT INTO accounts (user, acc_number, balance) VALUES (?, ?, ?)");
+
+        if ($stmt2->execute([$new_user_id, $acc_number, 1000])) {
+            $_SESSION['msg'] = "Account created successfully, Please Login.";
+            $_SESSION['msg_class'] = "#28a745";
+        } else {
+            $_SESSION['msg'] = "Account creation failed.";
+            $_SESSION['msg_class'] = "#dc3545";
+        }
+    } else {
+        $_SESSION['msg'] = "Error creating user.";
+        $_SESSION['msg_class'] = "#dc3545";
+    }
+    header("location: ../register.php");
+    exit();
 }
-
-$conn->prepare(
-    "INSERT INTO users (name, email, password) VALUES (?, ?, ?)"
-)->execute([$name, $email, $password]);
-
-$userId = $conn->lastInsertId();
-$accNo = mt_rand(10000, 99999);
-
-$conn->prepare(
-    "INSERT INTO accounts (user, acc_number, balance)
-     VALUES (?, ?, ?)"
-)->execute([$userId, $accNo, 1000]);
-
-$_SESSION['msg'] = "Account created successfully";
-$_SESSION['msg_class'] = "#28a745";
-header("Location: ../index.php");

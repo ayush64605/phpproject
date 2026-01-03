@@ -1,23 +1,4 @@
 <?php
-require_once 'backend/transaction.php';
-require_once 'backend/loan.php';
-
-$conn = Database::connect();
-
-$userId = $_SESSION['user']['id'] ?? null;
-if (!$userId) {
-    header('location:index.php');
-    exit;
-}
-
-$account = new Transaction($conn);
-
-$accNo   = $account->getAccountNumber($userId);
-$balance = $account->showBalance($userId);
-
-$totalIn  = $account->getTotalIn($accNo);
-$totalOut = $account->getTotalOut($accNo);
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,7 +25,6 @@ $totalOut = $account->getTotalOut($accNo);
             <a href="backend/logout.php"><button type="submit" class="btn btn-danger">Logout</button></a>
         </div>
         <p>Your Account No. <?php
-        print_r($accNo);
         ?></p>
         <?php if (isset($_SESSION['msg'])): ?>
             <div
@@ -63,7 +43,7 @@ $totalOut = $account->getTotalOut($accNo);
                     <div class="card-body">
                         <h5 class="card-title">Balance</h5>
                         <?php
-                        print_r($balance);
+                        print_r($rs1['balance']);
                         ?>
                     </div>
                     <div class="card-footer d-flex" style="justify-content:space-between">
@@ -80,7 +60,7 @@ $totalOut = $account->getTotalOut($accNo);
                         <h5 class="card-title">Total Loans</h5>
                         <?php
                         $obAccount = new Loan($conn);
-                        $loans = $obAccount->getLoans($accNo);
+                        $loans = $obAccount->getLoans($rs['acc_number']);
                         $total = 0;
                         foreach ($loans as $loan):
                             $total = $total + 1;
@@ -99,14 +79,12 @@ $totalOut = $account->getTotalOut($accNo);
                     <div class="card-body d-flex" style="justify-content:space-between">
                         <div>
                             <h5 class="card-title">Total In</h5>
-                            <p class="card-text">
-                                <?php print_r(number_format($totalIn, 2)); ?>
                             </p>
                         </div>
                         <div>
                             <h5 class="card-title">Total Out</h5>
-                            <p class="card-text">
-                                <?php print_r(number_format($totalOut, 2)); ?>
+                            <p class="card-text h3">
+                                <?php echo number_format($totalOut, 2); ?>
                             </p>
                         </div>
                     </div>
