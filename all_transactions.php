@@ -22,7 +22,7 @@ $transactions = $account->getTransaction($accNo);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="assets/css/style.css">
-    <title>All Trasansctions</title>
+    <title>All Transaction</title>
 </head>
 
 
@@ -39,8 +39,8 @@ $transactions = $account->getTransaction($accNo);
                 <table class="table mt-4">
                     <thead>
                         <tr>
-                            <th scope="col">Trsanfer From</th>
-                            <th scope="col">Trsanfer To</th>
+                            <th scope="col">Transfer From</th>
+                            <th scope="col">Transfer To</th>
                             <th scope="col">Amount</th>
                             <th scope="col">Type</th>
                         </tr>
@@ -55,12 +55,12 @@ $transactions = $account->getTransaction($accNo);
                                     <?php
                                     if ($transaction['from_acc'] == $accNo):
                                         ?>
-                                        <td>Debit</td>
+                                        <td style="color:#dc3545">Debit</td>
 
                                         <?php
                                             elseif ($transaction['to_acc'] == $accNo):
                                         ?>
-                                        <td>Credit</td>
+                                        <td style="color:#28a745">Credit</td>
                                     <?php endif ?>
 
                                 </tr>

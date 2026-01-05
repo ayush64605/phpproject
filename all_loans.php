@@ -41,7 +41,7 @@ $loans = $account->getLoans($accNo);
                         <tr>
                             <th scope="col">Loan Number</th>
                             <th scope="col">Amount</th>
-                            <th scope="col">RestAmount</th>
+                            <th scope="col">Rest Amount</th>
                             <th scope="col">Add Amount</th>
                         </tr>
                     </thead>

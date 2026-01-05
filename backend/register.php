@@ -29,6 +29,11 @@ $conn->prepare(
      VALUES (?, ?, ?)"
 )->execute([$userId, $accNo, 1000]);
 
+$conn->prepare(
+    "INSERT INTO transactions (from_acc, to_acc, amount)
+     VALUES (?, ?, ?)"
+)->execute(["Initial Balance", $accNo, 1000]);
+
 $_SESSION['msg'] = "Account created successfully";
 $_SESSION['msg_class'] = "#28a745";
 header("Location: ../index.php");
