@@ -12,9 +12,13 @@ if (isset($_POST['deposit'])) {
     $account = new Transaction($conn);
 
     $balance = $account->showBalance($userId);
-    $newBal  = $balance + $_POST['amount'];
+    $accNo = $account->getAccountNumber($userId);
+
+    $newBal = $balance + $_POST['amount'];
 
     $account->updateBalance($userId, $newBal);
+    $account->addTransaction("Self", $accNo, $_POST['amount']);
+
 
     $_SESSION['msg'] = "Deposit successfully.";
     $_SESSION['msg_class'] = "#28a745";

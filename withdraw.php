@@ -12,12 +12,16 @@ if (isset($_POST['Withdraw'])) {
     $account = new Transaction($conn);
 
     $balance = $account->showBalance($userId);
+    $accNo = $account->getAccountNumber($userId);
+
 
     if ($balance < $_POST['amount']) {
         $_SESSION['msg'] = "Enter Valid Amount.";
         $_SESSION['msg_class'] = "#dc3545";
     } else {
         $account->updateBalance($userId, $balance - $_POST['amount']);
+        $account->addTransaction($accNo, "Self", $_POST['amount']);
+
         $_SESSION['msg'] = "Withdrawal successfully.";
         $_SESSION['msg_class'] = "#28a745";
     }

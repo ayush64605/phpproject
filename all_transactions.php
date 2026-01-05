@@ -39,16 +39,30 @@ $transactions = $account->getTransaction($accNo);
                 <table class="table mt-4">
                     <thead>
                         <tr>
+                            <th scope="col">Trsanfer From</th>
                             <th scope="col">Trsanfer To</th>
                             <th scope="col">Amount</th>
+                            <th scope="col">Type</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (!empty($transactions)): ?>
                             <?php foreach ($transactions as $transaction): ?>
                                 <tr>
+                                    <td><?= $transaction['from_acc']; ?></td>
                                     <td><?= $transaction['to_acc']; ?></td>
                                     <td><?= $transaction['amount']; ?></td>
+                                    <?php
+                                    if ($transaction['from_acc'] == $accNo):
+                                        ?>
+                                        <td>Debit</td>
+
+                                        <?php
+                                            elseif ($transaction['to_acc'] == $accNo):
+                                        ?>
+                                        <td>Credit</td>
+                                    <?php endif ?>
+
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>

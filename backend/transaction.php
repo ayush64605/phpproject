@@ -6,12 +6,12 @@ class Transaction extends Account implements TransactionInterface
 {
     use TransactionTrait;
 
-    public function getTransaction(int $accNo): array
+    public function getTransaction(string $accNo): array
     {
         $stmt = $this->getConnection()->prepare(
-            "SELECT * FROM transactions WHERE from_acc = ?"
+            "SELECT * FROM transactions WHERE from_acc = ? OR to_acc=?"
         );
-        $stmt->execute([$accNo]);
+        $stmt->execute([$accNo, $accNo]);
         return $stmt->fetchAll();
     }
 
