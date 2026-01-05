@@ -1,16 +1,17 @@
 <?php
-include_once 'backend/transaction.php';
-$user = $_SESSION['user']['id'];
-if (!$user) {
+require_once 'backend/transaction.php';
+$conn = Database::connect();
+
+$userId = $_SESSION['user']['id'] ?? null;
+if (!$userId) {
     header('location:index.php');
+    exit;
 }
 
 $account = new Transaction($conn);
+$accNo = $account->getAccountNumber($userId);
+$transactions = $account->getTransaction($accNo);
 
-$user = $_SESSION['user']['id'];
-$acc_no = $account->getAccno($user);
-
-$transactions = $account->getTransaction($acc_no['acc_number']);
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -1,48 +1,38 @@
 <?php
-include_once 'backend/loan.php';
-$user = $_SESSION['user']['id'];
-if (!$user) {
+require_once 'backend/loan.php';
+$conn = Database::connect();
+
+$userId = $_SESSION['user']['id'] ?? null;
+if (!$userId) {
     header('location:index.php');
+    exit;
 }
+
 if (isset($_POST['deposit'])) {
     $account = new Loan($conn);
 
-    $user = $_SESSION['user']['id'];
-    $rs = $account->showBalance($user);
-    $acc_no = $account->getAccno($user);
+    $balance = $account->showBalance($userId);
+    $accNo   = $account->getAccountNumber($userId);
 
+    $loanNo = $_GET['loan_no'];
+    $loanAmount = $account->getLoanAmount($loanNo);
 
-    $loan_no = $_GET['loan_no'];
+    $newBalance = $balance - $_POST['amount'];
+    $newLoanAmt = $loanAmount - $_POST['amount'];
 
-    $loan_amount = $account->getLoanAmount($loan_no);
-
-    $amount = $rs['balance'];
-
-    $value = $amount - $_POST['amount'];
-
-    $loan_value = $loan_amount['restamount'] - $_POST['amount'];
-
-    if ($amount < $_POST['amount'] || $loan_amount['restamount'] < $_POST['amount']) {
-        $_SESSION['msg'] = "Enter Vaild Amount.";
+    if ($balance < $_POST['amount'] || $loanAmount < $_POST['amount']) {
+        $_SESSION['msg'] = "Enter Valid Amount.";
         $_SESSION['msg_class'] = "#dc3545";
-        header("location:all_loans.php");
     } else {
-        $res2 = $account->updateBalance($_SESSION['user']['id'], $value);
-        $res3 = $account->updateLoanBalance($loan_no, $loan_value);
-        $res4 = $account->addTransaction($acc_no['acc_number'], "Loan", $_POST['amount']);
+        $account->updateBalance($userId, $newBalance);
+        $account->updateLoanBalance($loanNo, $newLoanAmt);
+        $account->addTransaction($accNo, "Loan", $_POST['amount']);
 
-
-        if ($res2 ) {
-            $_SESSION['msg'] = "Withdrawal successfully.";
-            $_SESSION['msg_class'] = "#28a745";
-            header("location:all_loans.php");
-
-        } else {
-            $_SESSION['msg'] = "Withdrawal failed.";
-            $_SESSION['msg_class'] = "#dc3545";
-            header("location:all_loans.php");
-        }
+        $_SESSION['msg'] = "Withdrawal successfully.";
+        $_SESSION['msg_class'] = "#28a745";
     }
+
+    header("location:all_loans.php");
 }
 ?>
 <!DOCTYPE html>

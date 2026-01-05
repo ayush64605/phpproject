@@ -1,37 +1,31 @@
 <?php
-include_once 'backend/loan.php';
-$user = $_SESSION['user']['id'];
-if (!$user) {
+require_once 'backend/loan.php';
+$conn = Database::connect();
+
+$userId = $_SESSION['user']['id'] ?? null;
+if (!$userId) {
     header('location:index.php');
+    exit;
 }
+
 if (isset($_POST['loan'])) {
     $account = new Loan($conn);
 
-    $user = $_SESSION['user']['id'];
-    $rs = $account->showBalance($user);
-    $acc_no = $account->getAccno($user);
+    $balance = $account->showBalance($userId);
+    $accNo   = $account->getAccountNumber($userId);
 
-    $amount = $rs['balance'];
-
-    if ($amount < $_POST['amount']) {
-        $_SESSION['msg'] = "Enter Vaild Amount.";
+    if ($balance < $_POST['amount']) {
+        $_SESSION['msg'] = "Enter Valid Amount.";
         $_SESSION['msg_class'] = "#dc3545";
-        header("location:dashboard.php");
     } else {
-        $res2 = $account->addLoan($acc_no['acc_number'], $_POST['amount']);
-
-        if ($res2) {
-            $_SESSION['msg'] = "Loan Added successfully.";
-            $_SESSION['msg_class'] = "#28a745";
-            header("location:dashboard.php");
-
-        } else {
-            $_SESSION['msg'] = "Load Apply failed.";
-            $_SESSION['msg_class'] = "#dc3545";
-            header("location:dashboard.php");
-        }
+        $account->addLoan($accNo, $_POST['amount']);
+        $_SESSION['msg'] = "Loan Added successfully.";
+        $_SESSION['msg_class'] = "#28a745";
     }
+
+    header("location:dashboard.php");
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

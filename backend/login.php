@@ -1,21 +1,25 @@
 <?php
-include_once('dbConnect.php');
+session_start();
+require_once 'dbConnect.php';
+
+$conn = Database::connect();
 
 $email = $_POST['email'];
 $password = $_POST['password'];
 
-$acc_user = $conn->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-$acc_user->execute([$email, $password]);
-$user_found = $acc_user->fetch();
+$stmt = $conn->prepare(
+    "SELECT * FROM users WHERE email = ? AND password = ?"
+);
+$stmt->execute([$email, $password]);
+$user = $stmt->fetch();
 
-if ($user_found) {
-    $_SESSION['user'] = $user_found;
-    header("location:../dashboard.php");
+if ($user) {
+    $_SESSION['user'] = $user;
+    header("Location: ../dashboard.php");
+    exit;
 } else {
-    $_SESSION['msg'] = "Invailid Credential.";
+    $_SESSION['msg'] = "Invalid Credential";
     $_SESSION['msg_class'] = "#dc3545";
-    header("location:../login.php");
+    header("Location: ../index.php");
+    exit;
 }
-
-
-?>
