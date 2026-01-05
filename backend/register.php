@@ -6,6 +6,9 @@ $conn = Database::connect();
 $name = $_POST['name'];
 $email = $_POST['email'];
 $password = $_POST['password'];
+$city = $_POST['city'];
+$branch = $_POST['branch'];
+
 
 $check = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $check->execute([$email]);
@@ -18,8 +21,8 @@ if ($check->fetch()) {
 }
 
 $conn->prepare(
-    "INSERT INTO users (name, email, password) VALUES (?, ?, ?)"
-)->execute([$name, $email, $password]);
+    "INSERT INTO users (name, email, password, city, branch) VALUES (?, ?, ?, ?, ?)"
+)->execute([$name, $email, $password, $city, $branch]);
 
 $userId = $conn->lastInsertId();
 $accNo = mt_rand(10000, 99999);

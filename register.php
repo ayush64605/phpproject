@@ -1,4 +1,12 @@
 <?php include('backend/dbConnect.php');
+require_once 'backend/admin/getter.php';
+$conn = Database::connect();
+
+$get_data = new Getter($conn);
+
+$cities = $get_data->getCities();
+$branches = $get_data->getBranches();
+
 ?>
 
 <!DOCTYPE html>
@@ -32,6 +40,26 @@
                             placeholder="Enter email" name="email">
                     </div>
                     <div class="form-group">
+                        <label for="exampleInputCity">City</label>
+                        <select name="city" id="city" class="form-control">
+                            <option value="">Select City</option>
+                            <?php foreach ($cities as $city): ?>
+                                <option value="<?= $city['id'] ?>"><?= $city['name'] ?></option>
+                            <?php endforeach; ?>
+
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputBranch">Branch</label>
+                        <select name="branch" id="branch" class="form-control">
+                            <option value="">Select Branch</option>
+                            <?php foreach ($branches as $branch): ?>
+                                <option value="<?= $branch['id'] ?>"><?= $branch['name'] ?></option>
+                            <?php endforeach; ?>
+
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="exampleInputPassword1">Password</label>
                         <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password"
                             name="password">
@@ -41,7 +69,7 @@
                             style="background-color: <?php echo $_SESSION['msg_class']; ?>; color: white; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
                             <?php
                             echo $_SESSION['msg'];
-                            unset($_SESSION['msg']); // Clear message after showing
+                            unset($_SESSION['msg']);
                             unset($_SESSION['msg_class']);
                             ?>
                         </div>

@@ -74,7 +74,7 @@ if (isset($_POST['transaction'])) {
                     </div>
                     <div class="form-group">
                         <label for="amount">Amount</label>
-                        <input type="number" class="form-control" id="amount" placeholder="Enter Amount" name="amount">
+                        <input type="text" class="form-control" id="amount" placeholder="Enter Amount" name="amount">
                     </div>
                     <?php if (isset($_SESSION['msg'])): ?>
                         <div
